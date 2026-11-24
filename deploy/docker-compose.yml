@@ -1,0 +1,64 @@
+# Local stack. From the repo root:
+#   docker compose -f deploy/docker-compose.yml up --build
+#   docker compose -f deploy/docker-compose.yml --profile otp up --build   # also OpenTripPlanner
+#
+#   web            http://localhost:8080
+#   driver-portal  http://localhost:8081
+#   server         http://localhost:3000
+#   otp            http://localhost:8082  (profile "otp"; needs a GTFS zip + OSM .pbf in deploy/otp/)
+#
+# Host ports are overridable: WEB_PORT, DRIVER_PORT, SERVER_PORT, REDIS_PORT, OTP_PORT.
+name: transit
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    environment:
+      PORT: 3000
+      REDIS_URL: redis://redis:6379
+      OTP_URL: http://otp:8080
+    ports:
+      - '${SERVER_PORT:-3000}:3000'
+    depends_on:
+      - redis
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        APP: web
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    depends_on:
+      - server
+
+  driver-portal:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        APP: driver-portal
+    ports:
+      - '${DRIVER_PORT:-8081}:80'
+    depends_on:
+      - server
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+
+  otp:
+    profiles: ['otp']
+    image: opentripplanner/opentripplanner:2.7.0
+    # Builds the graph from deploy/otp/*.zip (GTFS) and *.osm.pbf, then serves it.
+    command: ['--build', '--serve']
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx4g
+    volumes:
+      - ./otp:/var/opentripplanner
+    ports:
+      - '${OTP_PORT:-8082}:8080'
