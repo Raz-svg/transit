@@ -14,10 +14,14 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.4.3",
+    "@fastify/swagger": "^9.9.5",
+    "@fastify/swagger-ui": "^6.1.5",
+    "@fastify/websocket": "^11.3.7",
     "@transit/shared-types": "workspace:*",
     "fastify": "^5.12.8"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.2",
     "tsx": "^4.23.15"
   }
 }

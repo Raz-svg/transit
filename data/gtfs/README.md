@@ -1,10 +1,15 @@
 # data/gtfs
 
-The pilot GTFS feed, as plain `.txt` files (one directory per feed if there is more
-than one city). Required files: `agency.txt`, `routes.txt`, `stops.txt`, `trips.txt`,
-`stop_times.txt`, `calendar.txt`. Informal-transit additions: `frequencies.txt`,
-`shapes.txt`, `fare_attributes.txt` / `fare_rules.txt`.
+Generated feeds, one directory per feed. **Do not hand-edit**: change `data/geojson/`
+and run `pnpm data:build`.
 
-Use GTFS `route_type` 1500-series extended types where they fit (e.g. 1507 for
-shared taxi) and agree the mapping to `LegMode` in `packages/shared-types` with the
-server team.
+| Feed           | Coverage                                                        |
+| -------------- | --------------------------------------------------------------- |
+| `delhi-pilot/` | 7 informal routes, 23 stops: Kashmere Gate, Old Delhi, Chandni Chowk, Red Fort, Daryaganj–ITO, New Delhi Rly Stn–Connaught Place |
+
+The feed is committed (it is small) so the API can load it without Python. The API
+reads `GTFS_DIR` (default `data/gtfs/delhi-pilot`); OpenTripPlanner reads the zip
+produced by `python -m gtfs_pipeline package` in `deploy/otp/`.
+
+Pilot data is hand-traced from OpenStreetMap and plausible-but-unsurveyed headways and
+fares; replace with field data before public launch (see `data/pipelines/README.md`).

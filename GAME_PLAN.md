@@ -74,6 +74,19 @@ transit/
 
 ---
 
+### Implementation status (2026-11-24)
+
+| Contributor | Status | Highlights (details in [nitish.md](nitish.md)) |
+| :--- | :--- | :--- |
+| C1 Commuter UX | ✅ Sprints 1–4 scope | Bottom sheet, search + GPS, itinerary cards with live waits, Nearby lines, PWA offline + install, shareable/QR trip URLs |
+| C2 Map | ✅ | MapLibre + OpenFreeMap, route lines, live stands & animated vehicles, Nearby radius, long-press to pick, offline tiles |
+| C3 Backend | ✅ | GTFS-backed network, built-in frequency planner (OTP client + fallback), fare engine, live stand state, WebSocket, OpenAPI |
+| C4 Data | ✅ pilot | 7 corridors / 23 stops → validated GTFS with `frequencies.txt`, stop clustering, OTP packaging (stdlib Python) |
+| C5 DevOps & driver portal | ✅ | Bilingual driver portal with offline outbox, oxlint, Playwright E2E, CI (4 jobs), Docker stack, deployment guide |
+
+Still open: field-surveyed GPS traces/headways/fares (C4), real driver GPS feed and Redis-backed
+multi-instance state (C3), live OTP verification with an OSM extract (C3/C5), production hosting (C5).
+
 ## 2. Five-Contributor Matrix & Roles
 
 | Contributor | Role & Domain | Primary Tech Stack | Key Deliverables |

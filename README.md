@@ -1,25 +1,42 @@
 # Transit
 
-A fast, mobile-first web app (PWA) for **informal public transit**: auto-rickshaws,
-shared taxis and minibuses that run without timetables, stop where they like and
-charge by distance. Commuters plan A-to-B trips across these modes, see how busy
-each stand is, and watch vehicles live. Stand marshals and drivers report
-conditions from a one-tap web portal.
+A fast, mobile-first web app (PWA) for **informal public transit**: shared autos,
+e-rickshaws, shared taxis and minibuses that run without timetables, stop where they like
+and charge by distance. Commuters plan A-to-B trips across these modes, see how busy each
+stand is, and watch vehicles live. Stand marshals report conditions from a one-tap,
+bilingual (English/Hindi) web portal that works with patchy signal.
 
-Pilot city: Delhi. The full plan, roles and sprint roadmap are in [GAME_PLAN.md](GAME_PLAN.md).
+Pilot: 7 routes and 23 stops around Kashmere Gate, Old Delhi, Chandni Chowk, Red Fort,
+Daryaganj–ITO and New Delhi Railway Station–Connaught Place. Plan, roles and roadmap:
+[GAME_PLAN.md](GAME_PLAN.md). Build log: [nitish.md](nitish.md).
+
+## What works
+
+- **Trip planning** for frequency-based routes: walk + up to one transfer, expected waits
+  from live stand reports (or headways), per-ride distance fares in ₹, service hours.
+- **Live data** over WebSocket: stand queues and waits change the moment a marshal reports;
+  vehicles move on the map (simulated until driver GPS is live).
+- **Map** (MapLibre + OpenFreeMap): selected route, stands coloured by queue, live vehicles,
+  Nearby radius, long-press / right-click to set start or destination.
+- **Nearby lines** within 100 / 300 / 500 m.
+- **Offline**: installable PWA; recent trips and viewed map areas work without signal.
+- **Driver portal**: QR-code stand links, big one-tap reports, live feedback, offline outbox.
+- **Data pipeline**: hand-traced corridors → validated GTFS with `frequencies.txt`;
+  GPS boarding points → clustered virtual stops.
 
 ## Repository layout
 
 ```
 apps/
-  web/              Commuter PWA: Vite + React + TS              (C1, C2)
-  server/           Fastify API: OTP proxy, stands, telemetry    (C3)
-  driver-portal/    One-tap stand/driver reporting web app       (C5)
+  web/              Commuter PWA: Vite + React 19 + Tailwind + MapLibre   (C1, C2)
+  server/           Fastify API: planner, OTP client, fares, live WebSocket (C3)
+  driver-portal/    Stand-marshal reporting app                          (C5)
 packages/
-  shared-types/     API contracts shared by all apps             (C1-C3)
-data/               GTFS feed, corridor tracks, Python pipelines (C4)
-deploy/             Dockerfiles, docker-compose, nginx, OTP dir  (C5)
-docs/               API spec, contributor setup
+  shared-types/     API contracts shared by all apps                     (C1–C3)
+data/               Corridor sources, GTFS feed, Python pipeline          (C4)
+deploy/             Dockerfiles, docker-compose, nginx, OTP dir           (C5)
+e2e/                Playwright end-to-end tests                           (C5)
+docs/               API spec, setup, deployment
 legacy/             Original Trufi Core Flutter code, reference only
 ```
 
@@ -31,24 +48,31 @@ pnpm install
 pnpm dev
 ```
 
-| App            | URL                    |
-| -------------- | ---------------------- |
-| Commuter web   | http://localhost:5173  |
-| Driver portal  | http://localhost:5174  |
-| API            | http://localhost:3000  |
+| App            | URL                                                    |
+| -------------- | ------------------------------------------------------ |
+| Commuter web   | http://localhost:5173                                  |
+| Driver portal  | http://localhost:5174/?stand=kg-auto-1                 |
+| API + docs     | http://localhost:3000/docs                             |
 
-The API serves mock fixtures until the OTP and GTFS work lands, so every app works
-from day one. Full setup, Docker and per-contributor notes are in
-[docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md). The API is in
-[docs/API_SPEC.md](docs/API_SPEC.md).
+Or everything in Docker: `docker compose -f deploy/docker-compose.yml up --build`
+(web :8080, driver :8081, API :3000).
 
-## Scripts
+## Quality gates
 
-`pnpm dev` · `pnpm typecheck` · `pnpm test` · `pnpm build` · `pnpm format`
+`pnpm lint` · `pnpm typecheck` · `pnpm test` (110 TS unit/integration tests) ·
+`pnpm data:test` (18 pipeline tests) · `pnpm e2e` (17 Playwright tests, mobile + desktop).
+All run in CI with the Docker builds and a check that the committed GTFS matches its sources.
+
+## Docs
+
+- [docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md): setup, commands, where code lives
+- [docs/API_SPEC.md](docs/API_SPEC.md): HTTP + WebSocket contract
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): Docker, managed hosting, OTP, stand QR codes
+- Per-area READMEs in `apps/*`, `apps/web/src/map`, `data/pipelines`
 
 ## Origins and license
 
 This repository started as a clone of [Trufi Core](https://github.com/trufi-association/trufi-core)
 by the Trufi Association. That Flutter code is preserved in
-[legacy/trufi-core-flutter](legacy/trufi-core-flutter) as an algorithmic reference
-(GTFS handling, OTP clients, nearby-lines logic). Licensed under GPL-3.0, see [LICENSE](LICENSE).
+[legacy/trufi-core-flutter](legacy/trufi-core-flutter) as an algorithmic reference.
+Licensed under GPL-3.0, see [LICENSE](LICENSE).
