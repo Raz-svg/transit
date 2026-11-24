@@ -1,17 +1,12 @@
 # Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via 
-[issue](https://github.com/trufi-association/trufi-core/issues), via [Slack](https://trufiapp.slack.com/archives/C0114FKUE87) 
-or any other method with the owners of this repository before making a change. 
+1. Set up your machine with [docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md).
+2. Branch from `dev`: `feat/c1-...`, `feat/c2-...`, `feat/c3-...`, `data/c4-...`, `infra/c5-...`.
+3. Before pushing, run `pnpm typecheck && pnpm test && pnpm build` at the repo root.
+4. Open a PR into `dev`. CI must pass and one teammate must approve.
+5. Changes to `packages/shared-types` need a review from every contributor whose app uses the changed type.
+6. Don't add features under `legacy/`. Port the idea into `apps/` or `packages/`.
 
-Please note we have a code of conduct, please follow it in all your interactions with the project.
-
-## Pull Request Process
-
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
-2. Update the README.md with details of changes to the interface, this includes new environment 
-   variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of one other developers, or if you 
-   do not have permission to do that, you may request the second reviewer to merge it for you.
+`main` only receives merges from `dev` for releases.
+Full rules: [GAME_PLAN.md §6](GAME_PLAN.md#6-git-branching-strategy--contribution-rules).
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).

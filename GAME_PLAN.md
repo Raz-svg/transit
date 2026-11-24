@@ -10,6 +10,14 @@
 
 To make this cloned repository the official base repository while pivoting from Dart/Flutter to a modern Web + API stack, we organize the repo as an integrated monorepo. The existing Dart logic (`trufi_core_planner`, GTFS parsers, OTP integrations) is preserved under `legacy/` as an algorithmic reference.
 
+> **Status: done** (branch `infra/monorepo-reorg`). Decisions made while scaffolding:
+> - **Web & driver portal:** Vite + React 19 + TypeScript (not Next.js: a static PWA needs no SSR and Vite builds in ~100 ms).
+> - **Server:** Fastify 5 + TypeScript, so `shared-types` is used directly by the API. `/plan`, `/stands` and `/telemetry/reports` return mock fixtures until OTP lands.
+> - **Tooling:** pnpm 12 workspaces, TypeScript 7, Vitest, Prettier; CI in `.github/workflows/ci.yml` runs typecheck, lint, test, build.
+> - **Legacy:** the whole Flutter repo moved with history to `legacy/trufi-core-flutter/` (its Dart workspace still resolves there). Its CI workflows are now inactive.
+>
+> Setup: [docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md). API: [docs/API_SPEC.md](docs/API_SPEC.md).
+
 ### Proposed Directory Layout
 
 ```text

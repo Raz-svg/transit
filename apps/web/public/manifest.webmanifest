@@ -1,0 +1,10 @@
+{
+  "name": "Transit",
+  "short_name": "Transit",
+  "description": "Plan trips on autos, shared taxis and minibuses.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f766e",
+  "icons": []
+}
