@@ -56,3 +56,12 @@ build/
 legacy/trufi-core-flutter/apps/*/tools/*/out/*.json
 !legacy/trufi-core-flutter/apps/example/assets/search/search.json
 legacy/trufi-core-flutter/apps/*/tools/*/package-lock.json
+
+# Playwright
+/e2e/test-results/
+/e2e/playwright-report/
+/test-results/
+/playwright-report/
+
+# Generated stand QR sheets
+/tools/stand-qr/out/

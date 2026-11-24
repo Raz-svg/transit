@@ -14,13 +14,19 @@
     "dev:driver": "pnpm --filter @transit/driver-portal dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r --if-present lint",
+    "lint": "oxlint --deny-warnings",
     "test": "pnpm -r --if-present test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "data:build": "cd data/pipelines && python -m gtfs_pipeline build",
+    "data:test": "cd data/pipelines && python -m unittest discover -s tests -t .",
+    "data:package": "cd data/pipelines && python -m gtfs_pipeline package",
+    "e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
+    "oxlint": "^1.94.0",
     "prettier": "^3.10.1",
     "typescript": "^7.0.2",
     "vitest": "^5.1.1"

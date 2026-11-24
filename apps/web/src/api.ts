@@ -1,13 +1,60 @@
-import type { PlanRequest, PlanResponse } from '@transit/shared-types';
+import type {
+  NearbyStopsResponse,
+  NearestLineResponse,
+  PlanRequest,
+  PlanResponse,
+  StandStatus,
+  TransitRoute,
+} from '@transit/shared-types';
+import { config } from './config';
 
-/** Thin typed client for the transit API. In dev, Vite proxies /api to the server. */
-export async function fetchPlan(req: PlanRequest, signal?: AbortSignal): Promise<PlanResponse> {
-  const params = new URLSearchParams(
-    Object.entries(req)
-      .filter(([, v]) => v !== undefined)
+export class ApiError extends Error {
+  readonly status: number;
+  constructor(status: number, path: string) {
+    super(`${path} failed with ${status}`);
+    this.status = status;
+  }
+}
+
+export const isAbortError = (err: unknown) =>
+  err instanceof DOMException && err.name === 'AbortError';
+
+async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(`${config.apiBase}${path}`, {
+    signal,
+    headers: { accept: 'application/json' },
+  });
+  if (!res.ok) throw new ApiError(res.status, path);
+  return (await res.json()) as T;
+}
+
+const toQuery = (params: object) =>
+  new URLSearchParams(
+    Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== null)
       .map(([k, v]) => [k, String(v)]),
-  );
-  const res = await fetch(`/api/v1/plan?${params}`, { signal });
-  if (!res.ok) throw new Error(`plan request failed: ${res.status}`);
-  return res.json() as Promise<PlanResponse>;
+  ).toString();
+
+export const fetchPlan = (req: PlanRequest, signal?: AbortSignal) =>
+  getJson<PlanResponse>(`/api/v1/plan?${toQuery(req)}`, signal);
+
+export const fetchStand = (standId: string, signal?: AbortSignal) =>
+  getJson<StandStatus>(`/api/v1/stands/${encodeURIComponent(standId)}`, signal);
+
+export const fetchNearbyStops = (
+  q: { lat: number; lng: number; radius: number },
+  signal?: AbortSignal,
+) => getJson<NearbyStopsResponse>(`/api/v1/stops/nearby?${toQuery(q)}`, signal);
+
+export const fetchNearestLine = (q: { lat: number; lng: number }, signal?: AbortSignal) =>
+  getJson<NearestLineResponse>(`/api/v1/routes/nearest?${toQuery(q)}`, signal);
+
+let routesPromise: Promise<TransitRoute[]> | null = null;
+/** Routes change rarely; fetched once per session (and cached by the service worker). */
+export function fetchRoutes(): Promise<TransitRoute[]> {
+  routesPromise ??= getJson<TransitRoute[]>('/api/v1/routes').catch((err: unknown) => {
+    routesPromise = null; // allow a retry
+    throw err;
+  });
+  return routesPromise;
 }

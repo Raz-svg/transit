@@ -2,12 +2,12 @@
 
 ## Prerequisites
 
-| Tool    | Version  | Needed by                           |
-| ------- | -------- | ----------------------------------- |
-| Node.js | 22+ (see `.nvmrc`) | everyone                  |
-| pnpm    | 12 (`corepack enable` picks the pinned version) | everyone |
-| Docker  | recent   | full stack, OpenTripPlanner         |
-| Python  | 3.11+    | Contributor 4 (`data/pipelines`)    |
+| Tool    | Version                                          | Needed by                        |
+| ------- | ------------------------------------------------ | -------------------------------- |
+| Node.js | 22+ (see `.nvmrc`)                               | everyone                         |
+| pnpm    | 12 (`corepack enable` picks the pinned version)  | everyone                         |
+| Python  | 3.10+ (standard library only)                    | `data/` pipeline                 |
+| Docker  | recent                                           | full stack, OpenTripPlanner      |
 
 ## First run
 
@@ -15,60 +15,64 @@
 git clone <repo> transit && cd transit
 corepack enable
 pnpm install          # also builds packages/shared-types
-pnpm dev              # server :3000, web :5173, driver portal :5174
+pnpm dev              # API :3000, web :5173, driver portal :5174
 ```
 
-Open http://localhost:5173: you should see one mock itinerary from Kashmere Gate
-to Chandni Chowk. That proves web → Vite proxy → server → shared types all work.
+Open http://localhost:5173/?from=28.6675,77.2282,Kashmere%20Gate%20Metro&to=28.6563,77.2412,Red%20Fort
+You should see itineraries (M-14 first), the route on the map, and simulated vehicles
+moving. Open http://localhost:5174/?stand=kg-auto-1 and tap a button: the stand's badge in
+the commuter app changes within a second.
+
+API docs: http://localhost:3000/docs
 
 ## Everyday commands (repo root)
 
-| Command              | Does                                          |
-| -------------------- | --------------------------------------------- |
-| `pnpm dev`           | All apps in watch mode                        |
-| `pnpm dev:web`       | Only the commuter app                         |
-| `pnpm dev:server`    | Only the API                                  |
-| `pnpm dev:driver`    | Only the driver portal                        |
-| `pnpm typecheck`     | `tsc --noEmit` in every package               |
-| `pnpm test`          | Vitest in every package that has tests        |
-| `pnpm build`         | Production builds (shared-types first)        |
-| `pnpm format`        | Prettier                                      |
-| `pnpm --filter @transit/server add <pkg>` | Add a dependency to one package |
+| Command              | Does                                                    |
+| -------------------- | ------------------------------------------------------- |
+| `pnpm dev`           | All apps in watch mode (`dev:web`, `dev:server`, `dev:driver` for one) |
+| `pnpm lint`          | oxlint (correctness + suspicious, React hooks, a11y)    |
+| `pnpm typecheck`     | `tsc --noEmit` in every package                         |
+| `pnpm test`          | Vitest in every package                                 |
+| `pnpm build`         | Production builds (shared-types first)                  |
+| `pnpm e2e`           | Playwright against the builds (run `pnpm build` first; `PW_CHANNEL=chrome` to use local Chrome, or `pnpm exec playwright install chromium` once) |
+| `pnpm format`        | Prettier                                                |
+| `pnpm data:build`    | Rebuild + validate the GTFS feed from `data/geojson/`   |
+| `pnpm data:test`     | Pipeline unit tests                                     |
+| `pnpm data:package`  | Zip the feed for OpenTripPlanner                        |
+
+Before a PR: `pnpm format && pnpm lint && pnpm typecheck && pnpm test`. CI also runs
+`pnpm e2e`, the data tests, a feed-is-up-to-date check, and the Docker builds.
 
 ## Full stack in Docker
 
 ```sh
 docker compose -f deploy/docker-compose.yml up --build
-# web :8080, driver portal :8081, server :3000, redis :6379
-docker compose -f deploy/docker-compose.yml --profile otp up --build
-# adds OpenTripPlanner :8082 (put GTFS zip + OSM pbf in deploy/otp/ first)
+# web :8080, driver portal :8081, API :3000 — see docs/DEPLOYMENT.md for OTP
 ```
 
 ## Where your work goes
 
-| Contributor | Area                         | Directory                                  |
-| ----------- | ---------------------------- | ------------------------------------------ |
-| C1          | Commuter UI, PWA             | `apps/web/src/{components,hooks,pages}`    |
-| C2          | Map & geospatial             | `apps/web/src/map`                         |
-| C3          | API, OTP, telemetry          | `apps/server`                              |
-| C4          | GTFS & data pipelines        | `data/`                                    |
-| C5          | DevOps, CI, driver portal    | `deploy/`, `.github/`, `apps/driver-portal`|
-| C1-C3       | API contracts                | `packages/shared-types`                    |
+| Contributor | Area                         | Directory                                   |
+| ----------- | ---------------------------- | ------------------------------------------- |
+| C1          | Commuter UI, PWA             | `apps/web/src/{components,hooks,pages,lib}` |
+| C2          | Map & geospatial             | `apps/web/src/map`, `apps/web/src/lib/live.ts` |
+| C3          | API, routing, real-time      | `apps/server`                               |
+| C4          | GTFS & data pipelines        | `data/`                                     |
+| C5          | DevOps, QA, driver portal    | `deploy/`, `.github/`, `e2e/`, `apps/driver-portal` |
+| C1–C3       | API contracts                | `packages/shared-types`                     |
 
 ## Changing shared types
 
-`packages/shared-types` is the contract between the frontends and the server.
-Edit `src/*.ts`, run `pnpm typecheck` at the root (it type-checks every consumer),
-and request review from each contributor whose app uses the type. `pnpm dev`
-rebuilds the package on save.
+`packages/shared-types` is the contract between the apps and the server. Edit `src/*.ts`,
+run `pnpm typecheck` at the root (it checks every consumer), and ask each contributor whose
+app uses the type to review. `pnpm dev` rebuilds the package on save.
 
 ## Branches and PRs
 
-See [GAME_PLAN.md §6](../GAME_PLAN.md#6-git-branching-strategy--contribution-rules):
-branch from `dev` as `feat/c1-...`, `data/c4-...`, `infra/c5-...`; PRs need green CI
-(`typecheck`, `test`, `build`) and one approval.
+See [GAME_PLAN.md §6](../GAME_PLAN.md#6-git-branching-strategy--contribution-rules): branch
+from `dev` as `feat/c1-…`, `data/c4-…`, `infra/c5-…`; PRs need green CI and one approval.
 
 ## Legacy code
 
 The original Flutter app is in `legacy/trufi-core-flutter/` as a reference only.
-See [legacy/README.md](../legacy/README.md) for which package to read for what.
+See [legacy/README.md](../legacy/README.md).

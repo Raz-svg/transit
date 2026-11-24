@@ -1,7 +1,14 @@
 import type { NamedPlace } from './geo.js';
 
 /** Modes a leg can use. Informal modes are first-class, not folded into BUS. */
-export const LEG_MODES = ['WALK', 'AUTO_RICKSHAW', 'SHARED_TAXI', 'MINIBUS', 'BUS'] as const;
+export const LEG_MODES = [
+  'WALK',
+  'AUTO_RICKSHAW',
+  'E_RICKSHAW',
+  'SHARED_TAXI',
+  'MINIBUS',
+  'BUS',
+] as const;
 export type LegMode = (typeof LEG_MODES)[number];
 export type VehicleMode = Exclude<LegMode, 'WALK'>;
 
@@ -34,6 +41,9 @@ export interface PlanRequest {
   mode?: string;
   /** ISO 8601 departure time; defaults to now. */
   departAt?: string;
+  /** Display names echoed into the first/last legs (e.g. "Kashmere Gate Metro"). */
+  fromName?: string;
+  toName?: string;
 }
 
 export interface PlanResponse {
@@ -62,6 +72,11 @@ export interface Leg {
   distanceMeters: number;
   /** In minutes, e.g. { min: 3, max: 5 } renders as "every 3-5 min". */
   frequencyMinutes?: FrequencyRange;
+  /**
+   * Stand where this leg boards, when it is a known stand. Lets clients show
+   * live queue status from GET /api/v1/stands/:standId. Absent for WALK legs.
+   */
+  boardingStandId?: string;
   /** Google encoded polyline (precision 5). */
   geometryPolyline: string;
 }
@@ -94,6 +109,21 @@ export interface NearbyStop extends Stop {
 
 export interface NearbyStopsResponse {
   stops: NearbyStop[];
+}
+
+/**
+ * GET /api/v1/routes/nearest: the closest corridor to a point, with the point snapped
+ * onto it. Informal vehicles can often be hailed anywhere along their corridor, so this
+ * is useful even when no stop is close.
+ */
+export interface NearestLineResponse {
+  route: TransitRoute;
+  /** Closest point on the route's path. */
+  snapped: { lat: number; lng: number };
+  /** Straight-line distance from the query point to `snapped`. */
+  distanceMeters: number;
+  /** The route's closest stop to the query point. */
+  nearestStop: NearbyStop;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,13 +1,16 @@
 # Local stack. From the repo root:
 #   docker compose -f deploy/docker-compose.yml up --build
-#   docker compose -f deploy/docker-compose.yml --profile otp up --build   # also OpenTripPlanner
 #
 #   web            http://localhost:8080
 #   driver-portal  http://localhost:8081
-#   server         http://localhost:3000
-#   otp            http://localhost:8082  (profile "otp"; needs a GTFS zip + OSM .pbf in deploy/otp/)
+#   server         http://localhost:3000   (API docs: /docs)
 #
-# Host ports are overridable: WEB_PORT, DRIVER_PORT, SERVER_PORT, REDIS_PORT, OTP_PORT.
+# With OpenTripPlanner (needs deploy/otp/delhi-pilot-gtfs.zip from `pnpm data:package`
+# and an OSM extract, e.g. deploy/otp/delhi.osm.pbf; see deploy/otp/README.md):
+#   OTP_URL=http://otp:8080 docker compose -f deploy/docker-compose.yml --profile otp up --build
+#   otp            http://localhost:8082
+#
+# Host ports are overridable: WEB_PORT, DRIVER_PORT, SERVER_PORT, OTP_PORT.
 name: transit
 
 services:
@@ -17,12 +20,12 @@ services:
       dockerfile: deploy/Dockerfile.server
     environment:
       PORT: 3000
-      REDIS_URL: redis://redis:6379
-      OTP_URL: http://otp:8080
+      # Synthetic vehicles + stand reports so the demo looks alive. Set false for a real pilot.
+      SIMULATE: ${SIMULATE:-true}
+      # Empty = built-in planner. With the otp profile: http://otp:8080 (falls back if OTP is down).
+      OTP_URL: ${OTP_URL:-}
     ports:
       - '${SERVER_PORT:-3000}:3000'
-    depends_on:
-      - redis
 
   web:
     build:
@@ -45,11 +48,6 @@ services:
       - '${DRIVER_PORT:-8081}:80'
     depends_on:
       - server
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - '${REDIS_PORT:-6379}:6379'
 
   otp:
     profiles: ['otp']
