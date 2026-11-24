@@ -1,0 +1,75 @@
+{
+  "@@locale": "en",
+  "selectOrigin": "Select origin",
+  "@selectOrigin": {
+    "description": "Default hint text for the origin field in the search location bar"
+  },
+  "selectDestination": "Select destination",
+  "@selectDestination": {
+    "description": "Default hint text for the destination field in the search location bar"
+  },
+  "searchOrigin": "Search origin...",
+  "@searchOrigin": {
+    "description": "Default hint text for the origin search field on the location search screen"
+  },
+  "searchDestination": "Search destination...",
+  "@searchDestination": {
+    "description": "Default hint text for the destination search field on the location search screen"
+  },
+  "yourLocation": "Your Location",
+  "@yourLocation": {
+    "description": "Label for the quick action that uses the device's current location"
+  },
+  "chooseOnMap": "Choose on Map",
+  "@chooseOnMap": {
+    "description": "Label for the quick action that opens the map picker"
+  },
+  "yourPlaces": "YOUR PLACES",
+  "@yourPlaces": {
+    "description": "Uppercase section title above the saved places list"
+  },
+  "searchResults": "SEARCH RESULTS",
+  "@searchResults": {
+    "description": "Uppercase section title above the search results list"
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "Message shown when a search returns no results"
+  },
+  "searchCornersHint": "Search corners...",
+  "@searchCornersHint": {
+    "description": "Hint of the filter field inside a street's corners list (drill-down flow); it searches only within those corners"
+  },
+  "linesAlongStreet": "Lines along {street}",
+  "@linesAlongStreet": {
+    "description": "Action row on top of a street's corners list that opens the public transport lines running along that street (every corner searched at once)",
+    "placeholders": {
+      "street": {
+        "type": "String",
+        "example": "Avenida Heroínas"
+      }
+    }
+  },
+  "copiedToClipboard": "Copied",
+  "@copiedToClipboard": {
+    "description": "Short confirmation shown after a place or stop name was copied to the clipboard (long-press on the name, or the copy button)"
+  },
+  "originFieldLabel": "From",
+  "@originFieldLabel": {
+    "description": "Tiny caption above the origin field of the wide search bar"
+  },
+  "destinationFieldLabel": "To",
+  "@destinationFieldLabel": {
+    "description": "Tiny caption above the destination field of the wide search bar"
+  },
+  "goToCoordinates": "Go to {coordinates}",
+  "@goToCoordinates": {
+    "description": "Row offered when the typed query is a decimal latitude/longitude pair (trufi-sanaa#22); the placeholder is the pair as shown, e.g. \"15.29483, 44.22437\"",
+    "placeholders": {
+      "coordinates": {
+        "type": "String",
+        "example": "15.29483, 44.22437"
+      }
+    }
+  }
+}

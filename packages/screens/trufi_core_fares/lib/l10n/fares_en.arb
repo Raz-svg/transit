@@ -1,0 +1,45 @@
+{
+  "@@locale": "en",
+  "menuFares": "Fares",
+  "@menuFares": {
+    "description": "Menu item for fares screen"
+  },
+  "faresTitle": "Fare Information",
+  "@faresTitle": {
+    "description": "Title on fares screen"
+  },
+  "faresSubtitle": "Current prices for public transportation",
+  "@faresSubtitle": {
+    "description": "Subtitle explaining the fares screen"
+  },
+  "faresLastUpdated": "Last updated: {date}",
+  "@faresLastUpdated": {
+    "description": "Shows when fare info was last updated",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "01/01/2024"
+      }
+    }
+  },
+  "faresMoreInfo": "More Information",
+  "@faresMoreInfo": {
+    "description": "Button to open external fare information"
+  },
+  "faresTips": "Tips",
+  "@faresTips": {
+    "description": "Label for the additional notes card on the fares screen"
+  },
+  "fareCategoryRegular": "Regular",
+  "@fareCategoryRegular": {
+    "description": "Common fare category label apps can reuse via labelBuilder"
+  },
+  "fareCategoryStudent": "Student",
+  "@fareCategoryStudent": {
+    "description": "Common fare category label apps can reuse via labelBuilder"
+  },
+  "fareCategorySenior": "Senior",
+  "@fareCategorySenior": {
+    "description": "Common fare category label apps can reuse via labelBuilder"
+  }
+}

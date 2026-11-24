@@ -1,0 +1,45 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+build/
+
+.flutter-plugins-dependencies
+
+# Flutter/Dart generated files
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_export_environment.plist
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+
+# Node tooling under apps/*/tools (deps and generated data are not committed)
+apps/*/tools/*/node_modules/
+apps/*/tools/*/out/*.json
+# but the small committed sample the example ships is not generated data
+!apps/example/assets/search/search.json
+apps/*/tools/*/package-lock.json

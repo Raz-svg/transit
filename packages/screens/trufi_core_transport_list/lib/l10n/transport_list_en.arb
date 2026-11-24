@@ -1,0 +1,329 @@
+{
+  "@@locale": "en",
+  "menuTransportList": "Routes",
+  "searchRoutes": "Search routes",
+  "noRoutesFound": "No routes found",
+  "shareRoute": "Share route",
+  "stops": "{count} stops",
+  "@stops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "routeNotFound": "Route not found",
+  "@routeNotFound": {
+    "description": "Error title when route cannot be loaded"
+  },
+  "routeLoadError": "The route could not be loaded",
+  "@routeLoadError": {
+    "description": "Error message when route fails to load"
+  },
+  "pullDownToRefresh": "Pull down to refresh",
+  "tryDifferentSearch": "Try a different search term",
+  "buttonGoBack": "Go back",
+  "@buttonGoBack": {
+    "description": "Go back button label"
+  },
+  "routeCount": "{count} {count, plural, =1{route} other{routes}}",
+  "@routeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelDistance": "Distance",
+  "labelStops": "Stops",
+  "labelMode": "Mode",
+  "noStopsAvailable": "No stops available",
+  "loadingRoute": "Loading route...",
+  "otherAgencies": "Others",
+  "@otherAgencies": {
+    "description": "Group header for routes whose agency is unknown"
+  },
+  "shareRouteMessage": "Share: {uri}",
+  "@shareRouteMessage": {
+    "description": "Snackbar message shown when sharing a route link",
+    "placeholders": {
+      "uri": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultModeBus": "Bus",
+  "@defaultModeBus": {
+    "description": "Fallback transport mode label when a route has no mode name"
+  },
+  "mapSettingsTitle": "Map Settings",
+  "@mapSettingsTitle": {
+    "description": "App bar title of the map settings screen"
+  },
+  "mapTypeLabel": "Map Type",
+  "@mapTypeLabel": {
+    "description": "Section title for choosing the map type"
+  },
+  "applyChanges": "Apply Changes",
+  "@applyChanges": {
+    "description": "Button label to apply map settings changes"
+  },
+  "stopStart": "Start",
+  "@stopStart": {
+    "description": "Badge label for the first stop of a route"
+  },
+  "stopEnd": "End",
+  "@stopEnd": {
+    "description": "Badge label for the last stop of a route"
+  },
+  "stopInfoNotAvailable": "Stop information is not available for this route",
+  "@stopInfoNotAvailable": {
+    "description": "Explanation shown when a route has no stop data"
+  },
+  "errorLoadingRoutes": "Could not load routes",
+  "retry": "Retry",
+  "qrShareSubtitle": "Scan to open this operator's routes",
+  "@qrShareSubtitle": {
+    "description": "Subtitle of the operator QR dialog explaining what scanning does"
+  },
+  "copyQrImage": "Copy QR",
+  "@copyQrImage": {
+    "description": "Button that copies the QR code image to the clipboard"
+  },
+  "copyQrImageFailed": "Couldn't copy the QR",
+  "@copyQrImageFailed": {
+    "description": "Snackbar shown when copying the QR image to the clipboard fails"
+  },
+  "modeTram": "Tram",
+  "@modeTram": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeSubway": "Subway",
+  "@modeSubway": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeRail": "Rail",
+  "@modeRail": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeBus": "Bus",
+  "@modeBus": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeFerry": "Ferry",
+  "@modeFerry": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeCableTram": "Cable Tram",
+  "@modeCableTram": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeAerialLift": "Aerial Lift",
+  "@modeAerialLift": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeFunicular": "Funicular",
+  "@modeFunicular": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeTrolleybus": "Trolleybus",
+  "@modeTrolleybus": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "modeMonorail": "Monorail",
+  "@modeMonorail": {
+    "description": "GTFS route type shown as the transport mode"
+  },
+  "distanceKilometers": "{value} km",
+  "@distanceKilometers": {
+    "description": "Distance in kilometers; {value} is already formatted with the locale's decimal separator.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceMeters": "{value} m",
+  "@distanceMeters": {
+    "description": "Distance in meters; {value} is a whole number formatted for the locale.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "copiedToClipboard": "Copied",
+  "@copiedToClipboard": {
+    "description": "Short confirmation shown after a place or stop name was copied to the clipboard (long-press on the name, or the copy button)"
+  },
+  "menuNearbyLines": "Nearby lines",
+  "@menuNearbyLines": {
+    "description": "Drawer entry and title of the nearby lines screen (lines passing within walking distance)"
+  },
+  "nearbyAnchorYourLocation": "Your location",
+  "@nearbyAnchorYourLocation": {
+    "description": "Anchor row label when the search is centred on the device position"
+  },
+  "nearbyAnchorPinned": "Pinned location",
+  "@nearbyAnchorPinned": {
+    "description": "Anchor row label when the search is centred on a pin the user placed on the map"
+  },
+  "nearbyAnchorDefault": "City center (no location)",
+  "@nearbyAnchorDefault": {
+    "description": "Anchor row label when no fix and no pin exist and the app's default center is used. Keep it short: the header card gives it two lines of at most 18 characters each on a 360 dp phone, which leaves room for a larger system font size"
+  },
+  "nearbyAnchorAlongStreet": "Along {street}",
+  "@nearbyAnchorAlongStreet": {
+    "description": "Anchor row label when the search covers every corner of a street picked in the location search (lines along the street)",
+    "placeholders": {
+      "street": {
+        "type": "String",
+        "example": "Avenida Heroínas"
+      }
+    }
+  },
+  "nearbyUseMyLocation": "Use my location",
+  "@nearbyUseMyLocation": {
+    "description": "Button that re-centres the search on the device position"
+  },
+  "nearbyMovePinHint": "Long-press the map to move the pin",
+  "@nearbyMovePinHint": {
+    "description": "Hint under the anchor row and in the empty state explaining how to move the search point"
+  },
+  "nearbyLocationPermissionTitle": "Location permission",
+  "@nearbyLocationPermissionTitle": {
+    "description": "Title of the dialog shown when 'Use my location' is tapped on the nearby lines screen and the location permission is permanently denied"
+  },
+  "nearbyLocationPermissionDeniedForever": "Location permission is permanently denied. Enable it in your device settings to see the lines near you.",
+  "@nearbyLocationPermissionDeniedForever": {
+    "description": "Body of the permanently-denied dialog of the nearby lines screen; its action opens the app's settings page"
+  },
+  "nearbyLocationDisabledTitle": "Location disabled",
+  "@nearbyLocationDisabledTitle": {
+    "description": "Title of the dialog shown when 'Use my location' is tapped on the nearby lines screen and location services are switched off"
+  },
+  "nearbyLocationDisabledMessage": "Location services are disabled on your device. Enable them to see the lines near you.",
+  "@nearbyLocationDisabledMessage": {
+    "description": "Body of the location-disabled dialog of the nearby lines screen; its action opens the device's location settings"
+  },
+  "nearbyLocationOpenSettings": "Open settings",
+  "@nearbyLocationOpenSettings": {
+    "description": "Action of the location dialogs of the nearby lines screen: opens the settings page where location can be enabled"
+  },
+  "nearbyLocationPermissionDenied": "Location permission denied. Tap the button again to allow it, or long-press the map to move the pin.",
+  "@nearbyLocationPermissionDenied": {
+    "description": "Snack bar shown when 'Use my location' is tapped and the rider answers the system permission prompt with 'don't allow'"
+  },
+  "nearbyLocationNoFix": "Couldn't get your location. Try again in a moment, or long-press the map to move the pin.",
+  "@nearbyLocationNoFix": {
+    "description": "Snack bar shown when 'Use my location' is tapped, location is allowed and on, but no position arrives in time"
+  },
+  "nearbyRadiusChip": "{meters} m ({count})",
+  "@nearbyRadiusChip": {
+    "description": "Radius filter chip: distance bracket in meters and how many lines fall inside it",
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "300"
+      },
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "nearbyLinesInRadius": "{count, plural, =1{1 line} other{{count} lines}} within {meters} m",
+  "@nearbyLinesInRadius": {
+    "description": "Count pill at the top of the nearby lines sheet: how many lines fall within the selected radius",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      },
+      "meters": {
+        "type": "int",
+        "example": "300"
+      }
+    }
+  },
+  "nearbyAtDistance": "At {distance}",
+  "@nearbyAtDistance": {
+    "description": "Row title when the line is reached at a stop; {distance} is already formatted (e.g. '75 m')",
+    "placeholders": {
+      "distance": {
+        "type": "String",
+        "example": "75 m"
+      }
+    }
+  },
+  "nearbyPassesAtDistance": "Passes by at {distance}",
+  "@nearbyPassesAtDistance": {
+    "description": "Row title when the line's route runs closer than any of its stops; {distance} is already formatted",
+    "placeholders": {
+      "distance": {
+        "type": "String",
+        "example": "150 m"
+      }
+    }
+  },
+  "nearbyStopName": "Stop {name}",
+  "@nearbyStopName": {
+    "description": "Row subtitle: name of the nearest stop of the line",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Calle San Simón"
+      }
+    }
+  },
+  "nearbyTowards": "To {headsign}",
+  "@nearbyTowards": {
+    "description": "Row subtitle: destination (headsign) of the line",
+    "placeholders": {
+      "headsign": {
+        "type": "String",
+        "example": "Av. Blanco Galindo"
+      }
+    }
+  },
+  "nearbyEmptyTitle": "No lines pass within {meters} m",
+  "@nearbyEmptyTitle": {
+    "description": "Empty state when no line passes within the widest search radius",
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "500"
+      }
+    }
+  },
+  "nearbyEmptyInRadius": "No lines within {meters} m. Try a larger radius.",
+  "@nearbyEmptyInRadius": {
+    "description": "Empty state when lines exist farther away but none inside the selected radius",
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "nearbyUnavailableTitle": "Nearby lines need the offline GTFS planner",
+  "@nearbyUnavailableTitle": {
+    "description": "Shown when the app has no local GTFS feed to search"
+  },
+  "nearbyUnavailableHint": "Add a local TrufiPlannerProvider with a bundled GTFS feed to the routing engines.",
+  "@nearbyUnavailableHint": {
+    "description": "Developer-facing hint under the unavailable title"
+  },
+  "nearbyLoadingData": "Loading offline data…",
+  "@nearbyLoadingData": {
+    "description": "Shown while the bundled GTFS feed is being read"
+  },
+  "nearbyFooterNote": "Based on GTFS routes and schedules",
+  "@nearbyFooterNote": {
+    "description": "Footer note of the nearby lines sheet"
+  },
+  "nearbyOpenDetails": "Line details",
+  "@nearbyOpenDetails": {
+    "description": "Tooltip of the chevron that opens the route detail of a nearby line"
+  }
+}

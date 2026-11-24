@@ -1,0 +1,159 @@
+{
+  "@@locale": "es",
+  "menuTransportList": "Rutas",
+  "searchRoutes": "Buscar rutas",
+  "noRoutesFound": "No se encontraron rutas",
+  "shareRoute": "Compartir ruta",
+  "stops": "{count} paradas",
+  "@stops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pullDownToRefresh": "Desliza hacia abajo para actualizar",
+  "tryDifferentSearch": "Intenta con otro término de búsqueda",
+  "routeNotFound": "Ruta no encontrada",
+  "routeLoadError": "No se pudo cargar la ruta",
+  "buttonGoBack": "Volver",
+  "routeCount": "{count} rutas",
+  "@routeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelDistance": "Distancia",
+  "labelStops": "Paradas",
+  "labelMode": "Modo",
+  "noStopsAvailable": "Sin paradas disponibles",
+  "loadingRoute": "Cargando ruta...",
+  "otherAgencies": "Otros",
+  "shareRouteMessage": "Compartir: {uri}",
+  "@shareRouteMessage": {
+    "placeholders": {
+      "uri": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultModeBus": "Bus",
+  "mapSettingsTitle": "Configuración del mapa",
+  "mapTypeLabel": "Tipo de mapa",
+  "applyChanges": "Aplicar cambios",
+  "stopStart": "Inicio",
+  "stopEnd": "Fin",
+  "stopInfoNotAvailable": "La información de paradas no está disponible para esta ruta",
+  "errorLoadingRoutes": "No se pudieron cargar las rutas",
+  "retry": "Reintentar",
+  "qrShareSubtitle": "Escanea para abrir las rutas de este operador",
+  "copyQrImage": "Copiar QR",
+  "copyQrImageFailed": "No se pudo copiar el QR",
+  "modeTram": "Tranvía",
+  "modeSubway": "Metro",
+  "modeRail": "Tren",
+  "modeBus": "Bus",
+  "modeFerry": "Ferry",
+  "modeCableTram": "Tranvía de cable",
+  "modeAerialLift": "Teleférico",
+  "modeFunicular": "Funicular",
+  "modeTrolleybus": "Trolebús",
+  "modeMonorail": "Monorriel",
+  "distanceKilometers": "{value} km",
+  "distanceMeters": "{value} m",
+  "copiedToClipboard": "Copiado",
+  "menuNearbyLines": "Líneas cercanas",
+  "nearbyAnchorYourLocation": "Tu ubicación",
+  "nearbyAnchorPinned": "Ubicación marcada",
+  "nearbyAnchorDefault": "Centro (sin ubicación)",
+  "nearbyAnchorAlongStreet": "A lo largo de {street}",
+  "nearbyUseMyLocation": "Usar mi ubicación",
+  "nearbyMovePinHint": "Mantén pulsado el mapa para mover el pin",
+  "nearbyLocationPermissionTitle": "Permiso de ubicación",
+  "nearbyLocationPermissionDeniedForever": "El permiso de ubicación fue denegado permanentemente. Habilítalo en la configuración de tu dispositivo para ver las líneas cercanas a ti.",
+  "nearbyLocationDisabledTitle": "Ubicación desactivada",
+  "nearbyLocationDisabledMessage": "Los servicios de ubicación están desactivados en tu dispositivo. Actívalos para ver las líneas cercanas a ti.",
+  "nearbyLocationOpenSettings": "Abrir configuración",
+  "nearbyLocationPermissionDenied": "Permiso de ubicación denegado. Toca el botón otra vez para permitirlo, o mantén pulsado el mapa para mover el pin.",
+  "nearbyLocationNoFix": "No se pudo obtener tu ubicación. Inténtalo de nuevo en un momento, o mantén pulsado el mapa para mover el pin.",
+  "nearbyRadiusChip": "{meters} m ({count})",
+  "@nearbyRadiusChip": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nearbyLinesInRadius": "{count, plural, =1{1 línea} other{{count} líneas}} a {meters} m",
+  "@nearbyLinesInRadius": {
+    "description": "Count pill at the top of the nearby lines sheet: how many lines fall within the selected radius",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      },
+      "meters": {
+        "type": "int",
+        "example": "300"
+      }
+    }
+  },
+  "nearbyAtDistance": "A {distance}",
+  "@nearbyAtDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "nearbyPassesAtDistance": "Pasa a {distance}",
+  "@nearbyPassesAtDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "nearbyStopName": "Parada {name}",
+  "@nearbyStopName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nearbyTowards": "Hacia {headsign}",
+  "@nearbyTowards": {
+    "placeholders": {
+      "headsign": {
+        "type": "String"
+      }
+    }
+  },
+  "nearbyEmptyTitle": "Ninguna línea pasa a menos de {meters} m",
+  "@nearbyEmptyTitle": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "nearbyEmptyInRadius": "No hay líneas a menos de {meters} m. Prueba un radio mayor.",
+  "@nearbyEmptyInRadius": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "nearbyUnavailableTitle": "Las líneas cercanas necesitan el planificador GTFS sin conexión",
+  "nearbyUnavailableHint": "Añade a los motores de rutas un TrufiPlannerProvider local con un GTFS incluido en la app.",
+  "nearbyLoadingData": "Cargando datos sin conexión…",
+  "nearbyFooterNote": "Basado en rutas y horarios GTFS",
+  "nearbyOpenDetails": "Detalles de la línea"
+}

@@ -1,0 +1,485 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import 'package:trufi_core_about/trufi_core_about.dart';
+import 'package:trufi_core_fares/trufi_core_fares.dart';
+import 'package:trufi_core_feedback/trufi_core_feedback.dart';
+import 'package:trufi_core_home_screen/trufi_core_home_screen.dart';
+import 'package:trufi_core_maps/trufi_core_maps.dart';
+import 'package:trufi_core_navigation/trufi_core_navigation.dart';
+import 'package:trufi_core_poi_layers/trufi_core_poi_layers.dart';
+import 'package:trufi_core_routing/trufi_core_routing.dart'
+    show
+        RoutingEngineManager,
+        IRoutingProvider,
+        Otp28RoutingProvider,
+        Otp15RoutingProvider,
+        TrufiPlannerProvider,
+        TrufiPlannerConfig;
+import 'package:trufi_core_saved_places/trufi_core_saved_places.dart';
+import 'package:trufi_core_search_locations/trufi_core_search_locations.dart';
+import 'package:trufi_core_settings/trufi_core_settings.dart';
+import 'package:trufi_core_transport_list/trufi_core_transport_list.dart';
+import 'package:trufi_core_ui/trufi_core_ui.dart';
+import 'package:trufi_core_utils/trufi_core_utils.dart' show OverlayManager;
+
+// ============ CONFIGURATION ============
+// OTP endpoints are overridable so the example runs without any Trufi
+// server: bring up local OTP instances over the bundled GTFS (see
+// tools/local-otp/README.md) and pass
+//   flutter run --dart-define=OTP28_ENDPOINT=http://10.0.2.2:8802 \
+//               --dart-define=OTP15_ENDPOINT=http://10.0.2.2:8801
+// (10.0.2.2 = host loopback from the Android emulator).
+const _otp28Endpoint = String.fromEnvironment(
+  'OTP28_ENDPOINT',
+  defaultValue: 'https://otp281.trufi.app',
+);
+const _otp15Endpoint = String.fromEnvironment(
+  'OTP15_ENDPOINT',
+  defaultValue: 'https://otp150.trufi.app',
+);
+// Mimic a single-engine deploy (trufi-sanaa: one offline planner, one
+// offline map, nothing to switch to) to check what such apps show — no
+// route-settings button on the home, no engine cards in Settings
+// (trufi-sanaa#23):
+//   flutter run --dart-define=SINGLE_ENGINE=true
+const _singleEngine = bool.fromEnvironment('SINGLE_ENGINE');
+
+// Route detail without stops (trufi-sanaa#18): a city whose feed carries
+// synthetic stops passes `showStops: false`. The example keeps the default
+// and exposes the switch for manual checks:
+//   flutter run --dart-define=ROUTE_DETAIL_SHOW_STOPS=false
+const _routeDetailShowStops = bool.fromEnvironment(
+  'ROUTE_DETAIL_SHOW_STOPS',
+  defaultValue: true,
+);
+const _photonUrl = 'https://photon.trufi.app';
+const _defaultCenter = LatLng(-17.3988354, -66.1626903);
+const _appName = 'Trufi App';
+const _deepLinkScheme = 'trufiapp';
+const _cityName = 'Cochabamba';
+const _countryName = 'Bolivia';
+const _emailContact = 'info@trufi-association.org';
+const _feedbackUrl = 'https://www.trufi-association.org/feedback/';
+const _facebookUrl = 'https://facebook.com/trufiapp';
+const _xTwitterUrl = 'https://x.com/trufiapp';
+const _instagramUrl = 'https://instagram.com/trufiapp';
+
+// Online routing via OTP 2.8 (dev server by default, local via dart-define).
+// Hoisted out of the list because its GTFS-RT feed also powers the live ETA
+// badges below; `liveVehiclesEnabled` surfaces the "Live buses" toggle too.
+final Otp28RoutingProvider _otp28 = Otp28RoutingProvider(
+  endpoint: _otp28Endpoint,
+  displayName: 'OTP 2.8.1',
+  liveVehiclesEnabled: true,
+);
+
+// Routing engines (similar to map engines)
+final List<IRoutingProvider> _routingEngines = [
+  // Offline routing via GTFS (mobile) / online via server (web)
+  if (!kIsWeb)
+    TrufiPlannerProvider(
+      config: const TrufiPlannerConfig.local(
+        gtfsAsset: 'assets/routing/cochabamba.gtfs.zip',
+      ),
+    ),
+  if (kIsWeb)
+    TrufiPlannerProvider(
+      config: const TrufiPlannerConfig.remote(
+        // The planner API lives behind the gateway's /api prefix; without
+        // it every request lands on the web app and comes back as HTML
+        // ("FormatException: Unexpected token '<'").
+        serverUrl: 'https://planner.trufi.app/api',
+      ),
+    ),
+  // Online routing via OTP (dev servers by default, local via dart-define)
+  if (!_singleEngine) ...[
+    _otp28,
+    Otp15RoutingProvider(endpoint: _otp15Endpoint, displayName: 'OTP 1.5.0'),
+  ],
+];
+
+// Map engines
+final List<ITrufiMapEngine> _mapEngines = [
+  // Offline maps - disabled on web
+  if (!kIsWeb) ...[
+    OfflineMapLibreEngine(
+      engineId: 'offline_osm_liberty',
+      displayName: 'Offline Liberty',
+      descriptionBuilder: (context) =>
+          MapsLocalizations.of(context).mapStyleStandardDescription,
+      config: OfflineMapConfig(
+        mbtilesAsset: 'assets/offline/cochabamba.mbtiles',
+        styleAsset: 'assets/offline/styles/osm-liberty/style.json',
+        spritesAssetDir: 'assets/offline/styles/osm-liberty/',
+        fontsAssetDir: 'assets/offline/fonts/',
+        fontMapping: {
+          'RobotoRegular': 'Roboto Regular',
+          'RobotoMedium': 'Roboto Medium',
+          'RobotoCondensedItalic': 'Roboto Condensed Italic',
+        },
+        fontRanges: [
+          '0-255',
+          '256-511',
+          '512-767',
+          '768-1023',
+          '1024-1279',
+          '1280-1535',
+          '8192-8447',
+          '8448-8703',
+        ],
+      ),
+    ),
+    if (!_singleEngine) ...[
+      OfflineMapLibreEngine(
+        engineId: 'offline_osm_bright',
+        displayName: 'Offline Bright',
+        descriptionBuilder: (context) =>
+            MapsLocalizations.of(context).mapStyleLightDescription,
+        config: OfflineMapConfig(
+          mbtilesAsset: 'assets/offline/cochabamba.mbtiles',
+          styleAsset: 'assets/offline/styles/osm-bright/style.json',
+          spritesAssetDir: 'assets/offline/styles/osm-bright/',
+          fontsAssetDir: 'assets/offline/fonts/',
+          fontMapping: {
+            'OpenSansRegular': 'Open Sans Regular',
+            'OpenSansBold': 'Open Sans Bold',
+            'OpenSansItalic': 'Open Sans Italic',
+          },
+          fontRanges: [
+            '0-255',
+            '256-511',
+            '512-767',
+            '768-1023',
+            '1024-1279',
+            '1280-1535',
+            '8192-8447',
+            '8448-8703',
+          ],
+        ),
+      ),
+      OfflineMapLibreEngine(
+        engineId: 'offline_dark_matter',
+        displayName: 'Offline Dark Matter',
+        descriptionBuilder: (context) =>
+            MapsLocalizations.of(context).mapStyleDarkDescription,
+        config: OfflineMapConfig(
+          mbtilesAsset: 'assets/offline/cochabamba.mbtiles',
+          styleAsset: 'assets/offline/styles/dark-matter/style.json',
+          spritesAssetDir: 'assets/offline/styles/dark-matter/',
+          fontsAssetDir: 'assets/offline/fonts/',
+          fontMapping: {
+            'MetropolisLight': 'Metropolis Light',
+            'MetropolisLightItalic': 'Metropolis Light Italic',
+            'MetropolisRegular': 'Metropolis Regular',
+            'MetropolisMediumItalic': 'Metropolis Medium Italic',
+            'NotoSansRegular': 'Noto Sans Regular',
+            'NotoSansItalic': 'Noto Sans Italic',
+          },
+          fontRanges: [
+            '0-255',
+            '256-511',
+            '512-767',
+            '768-1023',
+            '1024-1279',
+            '1280-1535',
+            '8192-8447',
+            '8448-8703',
+          ],
+        ),
+      ),
+      OfflineMapLibreEngine(
+        engineId: 'offline_fiord_color',
+        displayName: 'Offline Fiord Color',
+        descriptionBuilder: (context) =>
+            MapsLocalizations.of(context).mapStyleColorfulDescription,
+        config: OfflineMapConfig(
+          mbtilesAsset: 'assets/offline/cochabamba.mbtiles',
+          styleAsset: 'assets/offline/styles/fiord-color/style.json',
+          spritesAssetDir: 'assets/offline/styles/fiord-color/',
+          fontsAssetDir: 'assets/offline/fonts/',
+          fontMapping: {
+            'MetropolisLight': 'Metropolis Light',
+            'MetropolisLightItalic': 'Metropolis Light Italic',
+            'MetropolisRegular': 'Metropolis Regular',
+            'MetropolisMediumItalic': 'Metropolis Medium Italic',
+            'NotoSansRegular': 'Noto Sans Regular',
+            'NotoSansItalic': 'Noto Sans Italic',
+          },
+          fontRanges: [
+            '0-255',
+            '256-511',
+            '512-767',
+            '768-1023',
+            '1024-1279',
+            '1280-1535',
+            '8192-8447',
+            '8448-8703',
+          ],
+        ),
+      ),
+    ],
+  ],
+  // Online maps
+  if (!_singleEngine || kIsWeb)
+    MapLibreEngine(
+      engineId: 'osm_bright',
+      styleString: 'https://maps.trufi.app/styles/osm-bright/style.json',
+      displayName: 'OSM Bright',
+      descriptionBuilder: (context) =>
+          MapsLocalizations.of(context).mapStyleLightDescription,
+    ),
+  if (!_singleEngine) ...[
+    MapLibreEngine(
+      engineId: 'osm_liberty',
+      styleString: 'https://maps.trufi.app/styles/osm-liberty/style.json',
+      displayName: 'OSM Liberty',
+      descriptionBuilder: (context) =>
+          MapsLocalizations.of(context).mapStyleStandardDescription,
+    ),
+    MapLibreEngine(
+      engineId: 'dark_matter',
+      styleString: 'https://maps.trufi.app/styles/dark-matter/style.json',
+      displayName: 'Dark Matter',
+      descriptionBuilder: (context) =>
+          MapsLocalizations.of(context).mapStyleDarkDescription,
+    ),
+    MapLibreEngine(
+      engineId: 'fiord_color',
+      styleString: 'https://maps.trufi.app/styles/fiord-color/style.json',
+      displayName: 'Fiord Color',
+      descriptionBuilder: (context) =>
+          MapsLocalizations.of(context).mapStyleColorfulDescription,
+    ),
+  ],
+];
+// ========================================
+
+void main() {
+  runTrufiApp(
+    AppConfiguration(
+      appName: _appName,
+      deepLinkScheme: _deepLinkScheme,
+      defaultLocale: Locale('es'),
+      localeConfig: const TrufiLocaleConfig(
+        supportedLocales: [
+          Locale('es'),
+          Locale('en'),
+          Locale('de'),
+          Locale('qu'),
+        ],
+        languageNames: {'qu': 'Runasimi'},
+      ),
+      themeConfig: const TrufiThemeConfig(),
+      socialMediaLinks: [
+        SocialMediaLink(
+          url: _facebookUrl,
+          icon: SocialMediaPreset.facebook.icon,
+          label: 'Facebook',
+        ),
+        SocialMediaLink(
+          url: _xTwitterUrl,
+          icon: SocialMediaPreset.twitter.icon,
+          label: 'X (Twitter)',
+        ),
+        SocialMediaLink(
+          url: _instagramUrl,
+          icon: SocialMediaPreset.instagram.icon,
+          label: 'Instagram',
+        ),
+      ],
+      overlayManager: OverlayManager(
+        managers: [
+          OnboardingManager(
+            overlayBuilder: (onComplete) =>
+                OnboardingSheet(onComplete: onComplete),
+          ),
+          PrivacyConsentManager(
+            overlayBuilder: (onAccept, onDecline) => PrivacyConsentSheet(
+              onAccept: onAccept,
+              onDecline: onDecline,
+            ),
+          ),
+        ],
+      ),
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => MapEngineManager(
+            engines: _mapEngines,
+            defaultCenter: _defaultCenter,
+          ),
+        ),
+        ChangeNotifierProvider(
+          // 15 (not the default 5) because two of the example's engines
+          // return unfiltered near-duplicates (OTP 1.5, local planner):
+          // itinerary grouping (#737) needs the raw material, and the
+          // visible list stays short because duplicates collapse.
+          create: (_) => RoutingEngineManager(
+            engines: _routingEngines,
+            maxItineraries: 15,
+          ),
+        ),
+        BlocProvider(
+          create: (_) => SearchLocationsCubit(
+            // Both sources on purpose: the offline data owns streets and
+            // the corners between them ("Ayacucho y Heroínas"), which no
+            // geocoder can answer; Photon owns places and addresses and
+            // stays fresher. If either fails — no network, missing asset
+            // — the other still answers (#745).
+            searchLocationService: CompositeSearchLocationService(
+              services: [
+                OfflineSearchDataService(),
+                PhotonSearchService(
+                  baseUrl: _photonUrl,
+                  biasLatitude: _defaultCenter.latitude,
+                  biasLongitude: _defaultCenter.longitude,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      screens: [
+        HomeScreenTrufiScreen(
+          config: HomeScreenConfig(
+            appName: _appName,
+            deepLinkScheme: _deepLinkScheme,
+            poiLayersManager: POILayersManager(assetsBasePath: 'assets/pois'),
+            // Live ETA badges (#1004) follow the selected routing engine:
+            // OTP 2.8 derives them from its GTFS-RT feed (one snapshot per
+            // plan/refresh, no background polling); the offline planner and
+            // OTP 1.5 have no telemetry, so the badges hide with them. A
+            // city's own telemetry API plugs in as the engine's
+            // `vehicleEtaProvider`, or here as a legacy override for all.
+          ),
+          onStartNavigation: (context, itinerary, locationService) {
+            NavigationScreen.showFromItinerary(
+              context,
+              itinerary: itinerary,
+              locationService: locationService,
+              mapEngineManager: MapEngineManager.read(context),
+            );
+          },
+          onRouteTap: (context, routeCode) {
+            TransportDetailScreen.show(context, routeCode: routeCode);
+          },
+          // Lines along a street (trufi-sanaa#20): the corners list of the
+          // offline search opens the nearby-lines screen over every corner.
+          onLinesAlongStreet: (context, street, corners) {
+            NearbyLinesTrufiScreen.showAlongStreet(
+              context,
+              NearbyStreetAnchor(
+                name: street.displayName,
+                subtitle: street.address,
+                corners: [
+                  for (final corner in corners)
+                    LatLng(corner.latitude, corner.longitude),
+                ],
+              ),
+            );
+          },
+        ),
+        SavedPlacesTrufiScreen(),
+        SavedRoutesTrufiScreen(),
+        TransportListTrufiScreen(showStops: _routeDetailShowStops),
+        // Offline nearby lines (#1006): needs the local TrufiPlannerProvider
+        // above; on web (remote planner only) it shows the unavailable state.
+        NearbyLinesTrufiScreen(showStops: _routeDetailShowStops),
+        FaresTrufiScreen(
+          config: FaresConfig(
+            currency: 'Bs.',
+            lastUpdated: DateTime(2024, 1, 15),
+            fares: [
+              FareInfo(
+                title: 'Trufi',
+                icon: Icons.directions_bus,
+                primary: FareCategory(
+                  label: 'Regular',
+                  labelBuilder: (context) =>
+                      FaresLocalizations.of(context).fareCategoryRegular,
+                  price: '2.00',
+                  icon: Icons.person_rounded,
+                ),
+                additional: [
+                  FareCategory(
+                    label: 'Student',
+                    labelBuilder: (context) =>
+                        FaresLocalizations.of(context).fareCategoryStudent,
+                    price: '1.50',
+                    icon: Icons.school_rounded,
+                  ),
+                  FareCategory(
+                    label: 'Senior',
+                    labelBuilder: (context) =>
+                        FaresLocalizations.of(context).fareCategorySenior,
+                    price: '1.00',
+                    icon: Icons.elderly_rounded,
+                  ),
+                ],
+              ),
+              FareInfo(
+                title: 'Micro',
+                icon: Icons.airport_shuttle,
+                primary: FareCategory(
+                  label: 'Regular',
+                  labelBuilder: (context) =>
+                      FaresLocalizations.of(context).fareCategoryRegular,
+                  price: '1.50',
+                  icon: Icons.person_rounded,
+                ),
+                additional: [
+                  FareCategory(
+                    label: 'Student',
+                    labelBuilder: (context) =>
+                        FaresLocalizations.of(context).fareCategoryStudent,
+                    price: '1.00',
+                    icon: Icons.school_rounded,
+                  ),
+                  FareCategory(
+                    label: 'Senior',
+                    labelBuilder: (context) =>
+                        FaresLocalizations.of(context).fareCategorySenior,
+                    price: '0.75',
+                    icon: Icons.elderly_rounded,
+                  ),
+                ],
+              ),
+              FareInfo(
+                title: 'Minibus',
+                icon: Icons.directions_bus_filled,
+                primary: FareCategory(
+                  label: 'Regular',
+                  labelBuilder: (context) =>
+                      FaresLocalizations.of(context).fareCategoryRegular,
+                  price: '2.50',
+                  icon: Icons.person_rounded,
+                ),
+                additional: [
+                  FareCategory(
+                    label: 'Student',
+                    labelBuilder: (context) =>
+                        FaresLocalizations.of(context).fareCategoryStudent,
+                    price: '2.00',
+                    icon: Icons.school_rounded,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        FeedbackTrufiScreen(config: FeedbackConfig(feedbackUrl: _feedbackUrl)),
+        SettingsTrufiScreen(),
+        AboutTrufiScreen(
+          config: AboutScreenConfig(
+            appName: _appName,
+            cityName: _cityName,
+            countryName: _countryName,
+            emailContact: _emailContact,
+          ),
+        ),
+      ],
+    ),
+  );
+}

@@ -1,0 +1,53 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Flutter PR analyze
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the project
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+      - name: Install Flutter Actions
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.1"
+          channel: stable
+      - name: Bootstrap with Melos
+        uses: bluefireteam/melos-action@v3
+      - name: Run Flutter Analyze
+        run: melos ci:analyze
+      - name: Run Tests
+        # Unit + widget tests across every package. Integration suites
+        # (@Tags('integration')) hit real servers and are excluded here.
+        # Until now the check only analyzed — a green check ran no tests
+        # (issue #756).
+        run: melos ci:test
+      - name: Web compile check
+        # dart2js compiles ALL reachable code, with stricter rules than
+        # the VM (e.g. 64-bit integer literals don't exist in JS). Tests
+        # and analyze both run on the VM, so a change can be green here
+        # yet break `flutter build web` for every downstream app — which
+        # is exactly what happened with v5.22.1's fingerprint hash.
+        run: cd apps/example && flutter build web --release
+      - name: Translation Check
+        run: |
+          melos run l10n --no-select
+          # Stage changes so git diff includes newly created files
+          git add -A
+          # Fail if there are any changes in the staged area
+          git diff --staged --exit-code || (echo "Error: Localization files are out of sync. Run 'melos run l10n' locally and commit the changes." && exit 1)

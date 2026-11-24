@@ -1,0 +1,245 @@
+import 'package:flutter/material.dart';
+
+import '../../../l10n/transport_list_localizations.dart';
+import '../nearby_lines_cubit.dart';
+import '../nearby_street_anchor.dart';
+
+/// Floating header of the nearby-lines screen: a 44 px menu button (back on
+/// a street visit, see [onBack]) and the title card (screen title over the
+/// anchor line, plus the pin hint when the device position is not in use)
+/// across the rest of the width.
+///
+/// "Use my location" is a map control under the layers button, as on the
+/// home screen, and there is no close button: the card keeps about 236 px
+/// of text on a 360 dp phone. A long anchor label still wraps to a second
+/// line and the hint to a third rather than ending in an ellipsis
+/// (trufi-app#79).
+class NearbyHeaderCard extends StatelessWidget {
+  const NearbyHeaderCard({
+    super.key,
+    required this.state,
+    required this.onMenu,
+    this.onBack,
+    this.elevated = true,
+  });
+
+  final NearbyLinesState state;
+  final VoidCallback onMenu;
+
+  /// When set, the leading button goes back instead of opening the drawer:
+  /// a visit pushed over another screen (a street opened from the search
+  /// screen). iOS has no system back button and the app shell's drawer
+  /// takes the edge swipe (flutter/flutter#47959), so on iOS this is the
+  /// only way back; the drawer still opens with that swipe.
+  final VoidCallback? onBack;
+
+  /// Translucent, rounded and shadowed pieces when floating over the map
+  /// (phone); flat on `surface` when the row heads the side panel (wide).
+  final bool elevated;
+
+  /// Title card height: `titleMedium` (24) + 2 + one `bodySmall` anchor
+  /// line (16) + 2 × 8 padding; the pin hint adds 2 + up to three
+  /// `bodySmall` lines.
+  static const double cardHeight = 58;
+  static const double cardHeightWithHint = 108;
+
+  /// What the second line of a wrapped anchor label adds (`bodySmall`).
+  static const double anchorSecondLineHeight = 16;
+
+  /// The pin hint shows whenever the search is not anchored to a GPS fix.
+  static bool showsHint(NearbyLinesState state) =>
+      state.locationDenied || state.anchorSource == NearbyAnchorSource.fallback;
+
+  /// Whether the anchor label may need its second line on a phone: the
+  /// fallback label is a sentence in every language and a street label is
+  /// as long as the street's name. "Your location" and "Pinned location"
+  /// fit one line.
+  static bool anchorMayWrap(NearbyLinesState state) =>
+      state.anchorSource == NearbyAnchorSource.fallback ||
+      state.anchorSource == NearbyAnchorSource.street;
+
+  /// The tallest the title card gets for [state] at text scale 1.0; the
+  /// screen reserves this much map for the camera fit. The map controls do
+  /// not use it: on phones they hang under the card's real height.
+  static double heightFor(NearbyLinesState state) =>
+      (showsHint(state) ? cardHeightWithHint : cardHeight) +
+      (anchorMayWrap(state) ? anchorSecondLineHeight : 0);
+
+  static const Map<NearbyAnchorSource, IconData> _anchorIcons = {
+    NearbyAnchorSource.device: Icons.my_location_rounded,
+    NearbyAnchorSource.pin: Icons.push_pin_rounded,
+    NearbyAnchorSource.fallback: Icons.location_searching_rounded,
+    NearbyAnchorSource.street: Icons.signpost_rounded,
+  };
+
+  static final Map<
+    NearbyAnchorSource,
+    String Function(TransportListLocalizations, NearbyLinesState)
+  >
+  _anchorLabels = {
+    NearbyAnchorSource.device: (l10n, _) => l10n.nearbyAnchorYourLocation,
+    NearbyAnchorSource.pin: (l10n, _) => l10n.nearbyAnchorPinned,
+    NearbyAnchorSource.fallback: (l10n, _) => l10n.nearbyAnchorDefault,
+    NearbyAnchorSource.street: (l10n, state) =>
+        _streetLabel(l10n, state.street),
+  };
+
+  /// "Along `<street>` · `<municipality>`": the subtitle tells same-named
+  /// streets apart (Cochabamba's index has one "Avenida Circunvalación"
+  /// per municipality); omitted when the index carries none.
+  static String _streetLabel(
+    TransportListLocalizations l10n,
+    NearbyStreetAnchor? street,
+  ) {
+    final label = l10n.nearbyAnchorAlongStreet(street?.name ?? '');
+    final subtitle = street?.subtitle;
+    if (subtitle == null || subtitle.isEmpty) return label;
+    return '$label · $subtitle';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = TransportListLocalizations.of(context);
+    final showHint = showsHint(state);
+    final anchorLabel = _anchorLabels[state.anchorSource]!(l10n, state);
+
+    return Row(
+      children: [
+        _MapBarButton(
+          icon: onBack == null ? Icons.menu_rounded : Icons.arrow_back_rounded,
+          tooltip: onBack == null
+              ? MaterialLocalizations.of(context).openAppDrawerTooltip
+              : MaterialLocalizations.of(context).backButtonTooltip,
+          elevated: elevated,
+          onTap: onBack ?? onMenu,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Material(
+            color: elevated
+                ? colorScheme.surface.withValues(alpha: 0.95)
+                : colorScheme.surface,
+            borderRadius: BorderRadius.circular(14),
+            elevation: elevated ? 2 : 0,
+            shadowColor: Colors.black26,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.menuNearbyLines,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    // The glyph stays on the first line of a wrapped label
+                    // (14 px in a 16 px line).
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 1),
+                        child: Icon(
+                          _anchorIcons[state.anchorSource],
+                          size: 14,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        // Two lines hold the fallback label of every
+                        // language on a 360 dp phone. A street name longer
+                        // than that still ellipsizes; the tooltip (long
+                        // press) is the only place on this screen that
+                        // shows it whole.
+                        child: Tooltip(
+                          message: anchorLabel,
+                          child: Text(
+                            anchorLabel,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (showHint) ...[
+                    const SizedBox(height: 2),
+                    Padding(
+                      // Aligned with the anchor label (icon 14 + gap 6).
+                      padding: const EdgeInsetsDirectional.only(start: 20),
+                      child: Text(
+                        l10n.nearbyMovePinHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        // The Spanish and German hints need three lines
+                        // on a 360 dp phone.
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The 44 px square button of the map screens (the route detail's back and
+/// share buttons): `surface` at 0.95 with a small shadow over the map,
+/// `surfaceContainerHighest` and flat inside a side panel.
+class _MapBarButton extends StatelessWidget {
+  const _MapBarButton({
+    required this.icon,
+    required this.tooltip,
+    required this.elevated,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool elevated;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: elevated
+          ? colorScheme.surface.withValues(alpha: 0.95)
+          : colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+      elevation: elevated ? 2 : 0,
+      shadowColor: Colors.black26,
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            child: Icon(icon, size: 22, color: colorScheme.onSurface),
+          ),
+        ),
+      ),
+    );
+  }
+}
